@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Absensi PT. Pelita Graha Tunggal Mandiri</title>
+    <style>
+        /* Reset dasar */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ecf0f1;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header dan navigasi */
+        header {
+            background: linear-gradient(135deg, #2980b9, #6dd5fa);
+            padding: 30px 20px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        nav {
+            margin-top: 15px;
+        }
+
+        nav a {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 12px 25px;
+            font-weight: 600;
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #fff;
+            color: #2980b9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Konten utama */
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        main:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+        }
+
+        main p {
+            font-size: 1.2em;
+            text-align: center;
+            color: #34495e;
+        }
+
+        /* Judul utama */
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        /* Responsif */
+        @media(max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            nav a {
+                margin: 8px 10px;
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+            main {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sistem Absensi Pengenalan Wajah Guru Berbasis Web Pada TK Pelangi</h1>
+        <nav>
+            {% if session.get('role') == 'admin' %}
+            <a href="{{ url_for('register') }}">Pendaftaran Guru</a>
+            {% endif %}
+            <a href="{{ url_for('attendance') }}">Absensi</a>
+            <a href="{{ url_for('report') }}">Laporan Kehadiran</a>
+            {% if session.get('username') %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <p>Selamat datang di Sistem Absensi Guru TK Pelangi</p>
+    </main>
+</body>
+</html>

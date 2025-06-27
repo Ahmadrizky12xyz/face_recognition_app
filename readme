@@ -1,0 +1,20 @@
+face_recognition_app/
+│
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── script.js
+│   └── uploads/
+│
+├── templates/
+│   ├── index.html
+│   ├── register.html
+│   ├── attendance.html
+│   └── report.html
+│
+├── app.py
+├── database.db
+└── requirements.txt
+
+menjalankan aplikasi cd C:\Users\rizky\face_recognition_app>python app.py

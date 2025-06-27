@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Data Guru</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            color: #2c3e50;
+        }
+        ul {
+            list-style: none;
+            max-width: 700px;
+            margin: 0 auto 20px auto;
+            padding: 0;
+        }
+        li.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        li.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .form-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        .form-card h2 {
+            margin-bottom: 20px;
+            color: #34495e;
+            font-size: 1.8em;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="time"],
+        input[type="file"] {
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="time"]:focus,
+        input[type="file"]:focus {
+            border-color: #2980b9;
+            outline: none;
+        }
+        input[type="submit"] {
+            padding: 14px;
+            background-color: #27ae60;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #219150;
+        }
+        p {
+            text-align: center;
+            margin-top: 20px;
+        }
+        a {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media(max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            .form-card {
+                padding: 20px;
+            }
+            form {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Data Guru</h1>
+
+        <!-- Pesan flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form Edit -->
+        <div class="form-card">
+            <h2>Edit Data {{ employee[1] }}</h2>
+            <form method="post" enctype="multipart/form-data" id="editForm">
+                <label for="name">Nama:</label>
+                <input type="text" id="name" name="name" value="{{ employee[1] }}" required>
+
+                <label for="entry_time">Jam Masuk (HH:MM):</label>
+                <input type="time" id="entry_time" name="entry_time" value="{{ employee[3] if employee[3] else '' }}" required>
+
+                <label for="exit_time">Jam Pulang (HH:MM):</label>
+                <input type="time" id="exit_time" name="exit_time" value="{{ employee[4] if employee[4] else '' }}" required>
+
+                <label for="photo">Unggah Foto Wajah Baru (opsional):</label>
+                <input type="file" id="photo" name="photo" accept="image/*">
+
+                <input type="submit" value="Simpan Perubahan">
+            </form>
+        </div>
+
+        <p><a href="{{ url_for('register') }}">Kembali ke Pendaftaran</a></p>
+    </div>
+
+    <script>
+        document.getElementById('editForm').addEventListener('submit', function(event) {
+            const entryTime = document.getElementById('entry_time').value;
+            const exitTime = document.getElementById('exit_time').value;
+            const formData = {
+                name: document.getElementById('name').value,
+                entry_time: entryTime,
+                exit_time: exitTime,
+                photo: document.getElementById('photo').files[0]?.name || 'None'
+            };
+
+            console.log('Edit Form data:', formData);
+
+            if (!entryTime || !exitTime) {
+                event.preventDefault();
+                alert('Jam Masuk dan Jam Pulang harus diisi.');
+                return;
+            }
+
+            const entry = new Date(`1970-01-01T${entryTime}:00`);
+            const exit = new Date(`1970-01-01T${exitTime}:00`);
+
+            if (exit <= entry) {
+                event.preventDefault();
+                alert('Jam Pulang harus lebih besar dari Jam Masuk.');
+            }
+        });
+    </script>
+</body>
+</html>

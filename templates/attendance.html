@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Absensi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/face-api.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <style>
+        /* Reset dan gaya dasar */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 30px;
+            color: #333;
+        }
+
+        /* Header */
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        /* Pesan flash */
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+        }
+        li.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        li.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Container utama */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Flex container untuk video dan riwayat */
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Video container */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            aspect-ratio: 4/3;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        /* Kamera video */
+        #video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Overlay garis scan */
+        .scan-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00ffcc, transparent);
+            animation: scanAnim 2s infinite;
+            z-index: 2;
+        }
+        @keyframes scanAnim {
+            0% { top: 45%; }
+            50% { top: 55%; }
+            100% { top: 45%; }
+        }
+
+        /* Teks nama di atas video */
+        #nama {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #fff;
+            text-shadow: 0 0 4px rgba(0,0,0,0.7);
+            z-index: 3;
+        }
+
+        /* Notification status di overlay */
+        #notification {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(44, 62, 80, 0.8);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            min-width: 200px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* History container */
+        .history-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .history-container h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th, .history-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .history-table th {
+            background-color: #ecf0f1;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .history-table td {
+            color: #333;
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Tombol */
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-entry {
+            background-color: #27ae60;
+            color: #fff;
+        }
+        .btn-entry:hover {
+            background-color: #219150;
+        }
+        .btn-exit {
+            background-color: #e67e22;
+            color: #fff;
+        }
+        .btn-exit:hover {
+            background-color: #d35400;
+        }
+
+        /* Link kembali */
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 1em;
+            color: #2980b9;
+            text-decoration: none;
+            transition: color 0.2s;
+            text-align: center;
+        }
+        a:hover {
+            color: #1f6391;
+            text-decoration: underline;
+        }
+
+        /* Responsif */
+        @media(max-width: 900px) {
+            .content-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+            .video-container, .history-container {
+                max-width: 100%;
+            }
+            .history-container {
+                margin-top: 20px;
+            }
+        }
+        @media(max-width: 700px) {
+            body {
+                padding: 20px;
+            }
+            #notification {
+                font-size: 0.9em;
+            }
+            .button-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            button {
+                width: 100%;
+                max-width: 200px;
+            }
+            .history-table th, .history-table td {
+                font-size: 0.85em;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Absensi </h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <div class="content-wrapper">
+            <div class="video-container">
+                <!-- Video -->
+                <video id="video" autoplay muted></video>
+                <!-- Overlay garis scan -->
+                <div class="scan-line"></div>
+                <!-- Nama pengguna yang terdeteksi -->
+                <div id="nama"></div>
+                <!-- Status notif -->
+                <div id="notification">Lihat kekamera untuk absensi kehadiran</div>
+            </div>
+            <div class="history-container">
+                <h3>Riwayat Absensi</h3>
+                {% if records %}
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Waktu</th>
+                                <th>Status</th>
+                                <th>Jenis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr>
+                                <td>{{ record.name }}</td>
+                                <td>{{ record.timestamp }}</td>
+                                <td>{{ record.status }}</td>
+                                <td>{{ 'Masuk' if record.status in ['Hadir', 'Terlambat'] else 'Pulang' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p style="text-align: center; color: #666;">Belum ada riwayat absensi.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Canvas untuk face detection -->
+        <canvas id="canvas" style="display:none;"></canvas>
+        <form id="attendanceForm" method="POST" enctype="multipart/form-data" action="{{ url_for('attendance') }}">
+            <input type="file" name="photo" id="photo" style="display:none;">
+            <input type="hidden" name="attendance_type" id="attendance_type">
+            <div class="button-container">
+                <button type="button" class="btn-entry" onclick="captureImage('entry')">Absen Masuk</button>
+                <button type="button" class="btn-exit" onclick="captureImage('exit')">Absen Pulang</button>
+            </div>
+        </form>
+        <a href="{{ url_for('logout') }}">Kembali</a>
+    </div>
+    <script>
+        function captureImage(type) {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const photo = document.getElementById('photo');
+            const attendanceType = document.getElementById('attendance_type');
+
+            // Set jenis absensi (entry atau exit)
+            attendanceType.value = type;
+
+            // Ambil gambar dari video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Konversi canvas ke file gambar
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], 'attendance.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                photo.files = dataTransfer.files;
+
+                // Kirim formulir
+                document.getElementById('attendanceForm').submit();
+            }, 'image/jpeg');
+        }
+    </script>
+</body>
+</html>
